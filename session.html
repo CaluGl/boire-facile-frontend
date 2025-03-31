@@ -204,6 +204,7 @@
             dirDiv.appendChild(block);
           }
         }
+
         const barResponse = await fetch(
           "https://boire-facile-api.onrender.com/closest_bars",
           {
@@ -219,6 +220,13 @@
         barDiv.innerHTML =
           "<h3 class='text-lg font-bold mt-6 mb-2'>🍺 Bars les plus proches :</h3>";
         bars.forEach((bar) => {
+          // 📍 Marqueur sur la carte
+          const barMarker = L.marker([bar.latitude, bar.longitude])
+            .addTo(map)
+            .bindPopup(`${bar.nom}<br>${bar.adresse}<br>💶 ${bar.prix}`);
+          markers.push(barMarker);
+
+          // 🧾 Affichage dans le tableau
           barDiv.innerHTML += `
             <div class="bg-white p-3 rounded shadow mb-2">
               <strong>${bar.nom}</strong><br>
