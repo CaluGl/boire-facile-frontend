@@ -14,9 +14,7 @@
   <body
     class="bg-gray-100 min-h-screen flex flex-col items-center justify-start p-8 space-y-8"
   >
-    <body class="bg-cover bg-center bg-no-repeat min-h-screen" style="background-image: url('photo.jpg');">
     <div class="bg-white shadow-lg rounded p-6 max-w-2xl w-full">
-      <div class="bg-white bg-opacity-80 backdrop-blur-md shadow-lg rounded p-6 max-w-2xl w-full">
       <h1 class="text-2xl font-bold mb-4">🍻 Boire Facile — Session</h1>
       <p class="mb-4" id="session-id">Chargement de la session...</p>
 
@@ -206,6 +204,30 @@
             dirDiv.appendChild(block);
           }
         }
+        const barResponse = await fetch(
+          "https://boire-facile-api.onrender.com/closest_bars",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lat: avgLat, lon: avgLon }),
+          }
+        );
+        const barData = await barResponse.json();
+        const bars = barData.bars || [];
+
+        const barDiv = document.createElement("div");
+        barDiv.innerHTML =
+          "<h3 class='text-lg font-bold mt-6 mb-2'>🍺 Bars les plus proches :</h3>";
+        bars.forEach((bar) => {
+          barDiv.innerHTML += `
+            <div class="bg-white p-3 rounded shadow mb-2">
+              <strong>${bar.nom}</strong><br>
+              ${bar.adresse}<br>
+              💶 ${bar.prix} — 📏 ${bar.distance_m} mètres
+            </div>
+          `;
+        });
+        document.getElementById("result").appendChild(barDiv);
       }
     </script>
   </body>
