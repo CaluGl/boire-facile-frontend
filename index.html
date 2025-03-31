@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Boire Facile 🍻</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-yellow-50 min-h-screen flex items-center justify-center">
+    <div
+      class="bg-white p-6 rounded shadow-md text-center space-y-4 max-w-md w-full"
+    >
+      <h1 class="text-3xl font-bold">🍻 Boire Facile</h1>
+      <p>Crée un lien pour organiser une session avec tes potes 👇</p>
+
+      <button
+        onclick="generateLink()"
+        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+      >
+        🔗 Générer un lien
+      </button>
+
+      <div id="link-container" class="mt-4 hidden">
+        <p class="text-sm text-gray-600">Voici ton lien unique :</p>
+        <a
+          id="link"
+          class="text-blue-700 underline break-all"
+          target="_blank"
+        ></a>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
