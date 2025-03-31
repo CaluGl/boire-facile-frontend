@@ -220,16 +220,16 @@
         barDiv.innerHTML =
           "<h3 class='text-lg font-bold mt-6 mb-2'>🍺 Bars les plus proches :</h3>";
         bars.forEach((bar, index) => {
-          if (bar.latitude && bar.longitude) {
-            const barIcon = L.divIcon({
-              className: "custom-div-icon",
-              html: `<div style="background:#${
-                ["0074D9", "FF851B", "2ECC40"][index]
-              };color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:bold">${
-                index + 1
-              }</div>`,
-            });
+          const barIcon = L.divIcon({
+            className: "custom-div-icon",
+            html: `<div style="background:#${
+              ["0074D9", "FF851B", "2ECC40"][index]
+            };color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:bold">${
+              index + 1
+            }</div>`,
+          });
 
+          if (bar.latitude && bar.longitude) {
             const barMarker = L.marker([bar.latitude, bar.longitude], {
               icon: barIcon,
             })
