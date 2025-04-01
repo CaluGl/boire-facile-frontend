@@ -14,7 +14,7 @@
   <body
     class="bg-gray-100 min-h-screen flex flex-col items-center justify-start p-8 space-y-8"
   >
-    <div class="bg-white shadow-lg rounded p-6 max-w-2xl w-full">
+    <div class="bg-white shadow-lg rounded p-6 max-w-6xl w-full">
       <h1 class="text-2xl font-bold mb-4">🍻 Boire Facile — Session</h1>
       <p class="mb-4" id="session-id">Chargement de la session...</p>
 
@@ -54,7 +54,7 @@
       <div id="directions" class="mt-4 text-left text-sm space-y-4"></div>
     </div>
 
-    <div id="map" class="w-full max-w-4xl h-[500px] rounded shadow-md"></div>
+    <div id="map" class="w-full max-w-6xl h-[500px] rounded shadow-md"></div>
 
     <script>
       const sessionId = new URLSearchParams(window.location.search).get("id");
@@ -198,10 +198,14 @@
           }
 
           const barBlock = document.createElement("div");
-          barBlock.className = "bg-white p-3 rounded shadow mb-2";
+          barBlock.className = "bg-white p-3 rounded shadow mb-4";
           barBlock.innerHTML = `<strong>${index + 1}. ${bar.nom}</strong><br>${
             bar.adresse
-          }<br>💶 ${bar.prix} — 📏 ${bar.distance_m} mètres`;
+          }<br>💶 ${bar.prix} — 🖏 ${bar.distance_m} m`;
+
+          const itinerairesContainer = document.createElement("div");
+          itinerairesContainer.className =
+            "grid grid-cols-${coords.length} gap-4 mt-4";
 
           coords.forEach(async (c) => {
             try {
@@ -220,18 +224,25 @@
               const steps = data.steps || [];
               const duration = data.duration || "?";
 
-              barBlock.innerHTML += `<div class='mt-2'><strong>${
+              const itinDiv = document.createElement("div");
+              itinDiv.className = "bg-gray-50 p-3 rounded shadow-sm";
+              itinDiv.innerHTML = `<strong>${
                 c.name || c.address
               }</strong> <span class='text-gray-600'>(Durée : ${duration})</span><ul class="list-disc ml-5 mt-1">${steps
                 .map((s) => `<li>${s}</li>`)
-                .join("")}</ul></div>`;
+                .join("")}</ul>`;
+              itinerairesContainer.appendChild(itinDiv);
             } catch (err) {
-              barBlock.innerHTML += `<div class='bg-red-100 p-2 rounded mt-2'>${
+              const errDiv = document.createElement("div");
+              errDiv.className = "bg-red-100 p-2 rounded mt-2";
+              errDiv.innerText = `${
                 c.name || c.address
-              } : Erreur lors de l'itinéraire.</div>`;
+              } : Erreur lors de l'itinéraire.`;
+              itinerairesContainer.appendChild(errDiv);
             }
           });
 
+          barBlock.appendChild(itinerairesContainer);
           barDiv.appendChild(barBlock);
         });
 
