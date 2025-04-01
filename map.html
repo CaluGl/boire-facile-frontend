@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Carte des bars 🍻</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  </head>
+  <body class="bg-gray-100 min-h-screen p-6">
+    <div class="max-w-6xl mx-auto">
+      <h1 class="text-3xl font-bold mb-4 text-center">
+        🍻 Carte des bars à Paris
+      </h1>
+      <div id="map" class="w-full h-[80vh] rounded shadow"></div>
+    </div>
+
+    <script>
+      const map = L.map("map").setView([48.8566, 2.3522], 13); // Paris
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+      }).addTo(map);
+
+      fetch("https://boire-facile-api.onrender.com/all_bars")
+        .then((res) => res.json())
+        .then((data) => {
+          data.bars.forEach((bar) => {
+            if (bar.latitude && bar.longitude) {
+              const marker = L.marker([bar.latitude, bar.longitude])
+                .addTo(map)
+                .bindPopup(
+                  `<strong>${bar.nom}</strong><br>${bar.adresse}<br>💶 ${bar.prix}`
+                );
+            }
+          });
+        })
+        .catch((err) => {
+          console.error("Erreur lors du chargement des bars:", err);
+        });
+    </script>
+  </body>
+</html>

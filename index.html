@@ -5,21 +5,31 @@
     <title>Boire Facile 🍻</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </head>
   <body class="bg-yellow-50 min-h-screen flex items-center justify-center">
-    <body class="bg-cover bg-center bg-no-repeat min-h-screen" style="background-image: url('photo.jpg');">
     <div
       class="bg-white p-6 rounded shadow-md text-center space-y-4 max-w-md w-full"
     >
-      <div class="bg-white bg-opacity-80 backdrop-blur-md shadow-lg rounded p-6 max-w-2xl w-full">
       <h1 class="text-3xl font-bold">🍻 Boire Facile</h1>
-      <p>Crée un lien pour organiser une session avec tes potes 👇</p>
+      <p>Trouve un bar à mi-chemin avec tes potes 👇</p>
 
       <button
         onclick="generateLink()"
         class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
       >
-        🔗 Générer un lien
+        🔗 Trouver un bar à mi chemin
+      </button>
+
+      <button
+        onclick="window.location.href='map.html'"
+        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+      >
+        🗺 Voir tous les bars
       </button>
 
       <div id="link-container" class="mt-4 hidden">
@@ -29,6 +39,13 @@
           class="text-blue-700 underline break-all"
           target="_blank"
         ></a>
+        <button
+          id="copy-button"
+          onclick="copyLink()"
+          class="mt-2 bg-gray-200 px-3 py-1 rounded text-sm hover:bg-gray-300"
+        >
+          📋 Copier le lien
+        </button>
       </div>
     </div>
 

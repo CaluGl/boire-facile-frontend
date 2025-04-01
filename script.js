@@ -9,3 +9,16 @@ function generateLink() {
   link.innerText = window.location.origin + '/' + sessionURL;
   linkContainer.classList.remove('hidden');
 }
+
+function copyLink() {
+  const linkElement = document.getElementById("link");
+  const text = linkElement.href;
+
+  navigator.clipboard.writeText(text)
+    .then(() => {
+      alert("Lien copié dans le presse-papiers !");
+    })
+    .catch(() => {
+      alert("Erreur lors de la copie du lien.");
+    });
+}
