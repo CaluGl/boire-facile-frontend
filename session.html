@@ -164,47 +164,6 @@
         const group = new L.featureGroup(markers);
         map.fitBounds(group.getBounds().pad(0.2));
 
-        const dirDiv = document.getElementById("directions");
-        dirDiv.innerHTML =
-          "<h2 class='font-semibold text-lg mb-2'>🧭 Itinéraires en transport :</h2>";
-
-        for (let c of coords) {
-          try {
-            const res = await fetch(
-              "https://boire-facile-api.onrender.com/directions",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  origin: `${c.lat},${c.lon}`,
-                  destination: `${avgLat},${avgLon}`,
-                }),
-              }
-            );
-            const data = await res.json();
-            const steps = data.steps || [];
-            const duration = data.duration || "?";
-
-            const block = document.createElement("div");
-            block.className = "bg-gray-50 p-3 rounded shadow-sm";
-            block.innerHTML = `<strong>${
-              c.name || c.address
-            }</strong> <span class='text-gray-600'>(Durée : ${duration})</span><ul class="list-disc ml-5 mt-1">`;
-            for (let step of steps) {
-              block.innerHTML += `<li>${step}</li>`;
-            }
-            block.innerHTML += "</ul>";
-            dirDiv.appendChild(block);
-          } catch (err) {
-            const block = document.createElement("div");
-            block.className = "bg-red-100 p-3 rounded";
-            block.innerText = `${
-              c.name || c.address
-            } : Erreur lors de la récupération de l'itinéraire.`;
-            dirDiv.appendChild(block);
-          }
-        }
-
         const barResponse = await fetch(
           "https://boire-facile-api.onrender.com/closest_bars",
           {
@@ -238,14 +197,44 @@
             markers.push(barMarker);
           }
 
-          barDiv.innerHTML += `
-            <div class="bg-white p-3 rounded shadow mb-2">
-              <strong>${index + 1}. ${bar.nom}</strong><br>
-              ${bar.adresse}<br>
-              💶 ${bar.prix} — 📏 ${bar.distance_m} mètres
-            </div>
-          `;
+          const barBlock = document.createElement("div");
+          barBlock.className = "bg-white p-3 rounded shadow mb-2";
+          barBlock.innerHTML = `<strong>${index + 1}. ${bar.nom}</strong><br>${
+            bar.adresse
+          }<br>💶 ${bar.prix} — 📏 ${bar.distance_m} mètres`;
+
+          coords.forEach(async (c) => {
+            try {
+              const res = await fetch(
+                "https://boire-facile-api.onrender.com/directions",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    origin: `${c.lat},${c.lon}`,
+                    destination: `${bar.latitude},${bar.longitude}`,
+                  }),
+                }
+              );
+              const data = await res.json();
+              const steps = data.steps || [];
+              const duration = data.duration || "?";
+
+              barBlock.innerHTML += `<div class='mt-2'><strong>${
+                c.name || c.address
+              }</strong> <span class='text-gray-600'>(Durée : ${duration})</span><ul class="list-disc ml-5 mt-1">${steps
+                .map((s) => `<li>${s}</li>`)
+                .join("")}</ul></div>`;
+            } catch (err) {
+              barBlock.innerHTML += `<div class='bg-red-100 p-2 rounded mt-2'>${
+                c.name || c.address
+              } : Erreur lors de l'itinéraire.</div>`;
+            }
+          });
+
+          barDiv.appendChild(barBlock);
         });
+
         document.getElementById("result").appendChild(barDiv);
       }
     </script>
