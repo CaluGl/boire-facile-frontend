@@ -18,22 +18,7 @@
       <h1 class="text-2xl font-bold mb-4">🍻 Boire Facile — Session</h1>
       <p class="mb-4" id="session-id">Chargement de la session...</p>
 
-      <div id="addresses" class="space-y-2 mb-4">
-        <div class="flex gap-2">
-          <input
-            type="text"
-            placeholder="Prénom"
-            class="p-2 border rounded w-1/3"
-            data-type="name"
-          />
-          <input
-            type="text"
-            placeholder="Adresse"
-            class="p-2 border rounded w-2/3"
-            data-type="address"
-          />
-        </div>
-      </div>
+      <div id="addresses" class="space-y-2 mb-4"></div>
 
       <div class="flex gap-4 mb-4">
         <button
@@ -69,60 +54,59 @@
         const container = document.getElementById("addresses");
         const div = document.createElement("div");
         div.className = "flex gap-2";
-      
+
         const nameInput = document.createElement("input");
         nameInput.type = "text";
         nameInput.placeholder = "Prénom";
         nameInput.className = "p-2 border rounded w-1/3";
         nameInput.setAttribute("data-type", "name");
         nameInput.value = name;
-      
+
         const addressInput = document.createElement("input");
         addressInput.type = "text";
         addressInput.placeholder = "Adresse";
         addressInput.className = "p-2 border rounded w-2/3";
         addressInput.setAttribute("data-type", "address");
         addressInput.value = address;
-      
-        // Sauvegarde live à chaque frappe
-        nameInput.addEventListener("input", saveParticipants);
-        addressInput.addEventListener("input", saveParticipants);
-      
+
+        nameInput.addEventListener("input", debounceSave);
+        addressInput.addEventListener("input", debounceSave);
+
         div.appendChild(nameInput);
         div.appendChild(addressInput);
         container.appendChild(div);
       }
 
-
       async function loadParticipants() {
-        const res = await fetch(`https://boire-facile-api.onrender.com/get_participants?id=${sessionId}`);
+        const res = await fetch(
+          `https://boire-facile-api.onrender.com/get_participants?id=${sessionId}`
+        );
         const data = await res.json();
         const participants = data.participants || [];
-      
+
         if (participants.length === 0) {
-          // Ne rien afficher s'il n'y a rien
-          return;
+          addAddressField();
+        } else {
+          participants.forEach((p) => addAddressField(p.name, p.address));
         }
-      
-        participants.forEach((p) => addAddressField(p.name, p.address));
       }
-
-
-      loadParticipants();
 
       async function saveParticipants() {
         const rows = document.querySelectorAll("#addresses .flex");
         const participants = [];
-      
+
         rows.forEach((row) => {
-          const name = row.querySelector("input[data-type='name']").value.trim();
-          const address = row.querySelector("input[data-type='address']").value.trim();
-      
+          const name = row
+            .querySelector("input[data-type='name']")
+            .value.trim();
+          const address = row
+            .querySelector("input[data-type='address']")
+            .value.trim();
           if (name || address) {
             participants.push({ name, address });
           }
         });
-      
+
         await fetch("https://boire-facile-api.onrender.com/save_participants", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -130,6 +114,17 @@
         });
       }
 
+      function debounce(func, wait = 500) {
+        let timeout;
+        return function (...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+      }
+
+      const debounceSave = debounce(saveParticipants);
+
+      loadParticipants();
 
       async function calculateCenter() {
         const rows = document.querySelectorAll("#addresses .flex");
@@ -223,7 +218,7 @@
         barDiv.innerHTML =
           "<h3 class='text-lg font-bold mt-6 mb-2'>🍺 Bars les plus proches :</h3>";
 
-        for (const [index, bar] of bars.entries()) {
+        bars.forEach((bar, index) => {
           const barIcon = L.divIcon({
             className: "custom-div-icon",
             html: `<div style="background:#${
@@ -248,43 +243,8 @@
             bar.adresse
           }<br>💶 ${bar.prix} — 🖏 ${bar.distance_m} m`;
 
-          const table = document.createElement("div");
-          table.className = `grid grid-cols-${coords.length} gap-4 mt-4`;
-
-          await Promise.all(
-            coords.map(async (c) => {
-              const cell = document.createElement("div");
-              try {
-                const res = await fetch(
-                  "https://boire-facile-api.onrender.com/directions",
-                  {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      origin: `${c.lat},${c.lon}`,
-                      destination: `${bar.latitude},${bar.longitude}`,
-                    }),
-                  }
-                );
-                const data = await res.json();
-                const steps = data.steps || [];
-                const duration = data.duration || "?";
-
-                cell.innerHTML = `<div class='bg-gray-50 p-3 rounded shadow-sm'><strong>${
-                  c.name
-                }</strong><br><span class='text-gray-600'>(Durée : ${duration})</span><ul class='list-disc ml-5 mt-1'>${steps
-                  .map((s) => `<li>${s}</li>`)
-                  .join("")}</ul></div>`;
-              } catch (err) {
-                cell.innerHTML = `<div class='bg-red-100 p-2 rounded mt-2'>${c.name} : Erreur lors de l'itinéraire.</div>`;
-              }
-              table.appendChild(cell);
-            })
-          );
-
-          barBlock.appendChild(table);
           barDiv.appendChild(barBlock);
-        }
+        });
 
         document.getElementById("result").appendChild(barDiv);
       }
