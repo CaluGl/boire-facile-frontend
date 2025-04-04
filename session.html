@@ -32,7 +32,7 @@
           onclick="calculateCenter()"
           class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
-          📍 Trouver un bar à mi-chemin
+          📍 Calculer le point central
         </button>
       </div>
 
@@ -245,9 +245,9 @@
           barBlock.className = "bg-white p-3 rounded shadow mb-4";
           barBlock.innerHTML = `<strong>${index + 1}. ${bar.nom}</strong><br>${
             bar.adresse
-          }<br>💶 ${bar.prix} — 🕒 ${bar.happy_hour || "Non renseigné"} — 🖏 ${
-            bar.distance_m
-          } m`;
+          }<br>💶 ${bar.prix} — 🕒 Happy Hour : ${
+            bar.happy_hour || "Non renseigné"
+          } — 🖏 ${bar.distance_m} m`;
 
           const scrollWrapper = document.createElement("div");
           scrollWrapper.className = "overflow-x-auto";
