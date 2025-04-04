@@ -136,7 +136,12 @@
       const debounceSave = debounce(saveParticipants);
 
       loadParticipants();
-
+      function copyLink() {
+        const link = `${window.location.origin}${window.location.pathname}?id=${sessionId}`;
+        navigator.clipboard.writeText(link).then(() => {
+          alert("Lien copié dans le presse-papiers !");
+        });
+      }
       async function calculateCenter() {
         const rows = document.querySelectorAll("#addresses .flex");
         const coords = [];
