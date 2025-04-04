@@ -250,7 +250,7 @@
           scrollWrapper.className = "overflow-x-auto";
 
           const table = document.createElement("div");
-          table.className = `min-w-max flex gap-4 mt-4`;
+          table.className = `min-w-max flex gap-4 mt-4 justify-center`;
 
           await Promise.all(
             coords.map(async (c) => {
@@ -271,13 +271,24 @@
                 const steps = data.steps || [];
                 const duration = data.duration || "?";
 
-                cell.innerHTML = `<div class='bg-gray-50 p-3 rounded shadow-sm text-sm whitespace-normal break-words'><strong>${
-                  c.name
-                }</strong><br><span class='text-gray-600'>(Durée : ${duration})</span><ul class='list-disc ml-5 mt-1'>${steps
-                  .map((s) => `<li>${s}</li>`)
-                  .join("")}</ul></div>`;
+                const lignes = steps
+                  .filter((s) => s.includes("🚌"))
+                  .map((s) => {
+                    const match = s.match(/🚌 (.*?) de/);
+                    return match ? match[1] : "🚌 ?";
+                  });
+
+                cell.innerHTML = `
+                  <div class='bg-gray-50 p-3 rounded shadow-sm text-center text-sm whitespace-normal break-words w-32'>
+                    <div class="font-semibold">${c.name}</div>
+                    <div class="text-gray-600">⏱ ${duration}</div>
+                    <div class="text-blue-700">🚇 ${
+                      lignes.join(", ") || "-"
+                    }</div>
+                  </div>
+                `;
               } catch (err) {
-                cell.innerHTML = `<div class='bg-red-100 p-2 rounded mt-2'>${c.name} : Erreur lors de l'itinéraire.</div>`;
+                cell.innerHTML = `<div class='bg-red-100 p-2 rounded mt-2'>${c.name} : Erreur</div>`;
               }
               table.appendChild(cell);
             })
