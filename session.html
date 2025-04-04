@@ -237,7 +237,7 @@
               icon: barIcon,
             })
               .addTo(map)
-              .bindPopup(`${bar.nom}<br>${bar.adresse}<br>💶 ${bar.prix}`);
+              .bindPopup(`${bar.nom}<br>${bar.adresse}<br>💶 ${bar.prix}<br>🕒 Happy Hour : ${bar.happy_hour || 'Non renseigné'}`)
             markers.push(barMarker);
           }
 
