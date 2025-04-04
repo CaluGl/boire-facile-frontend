@@ -218,7 +218,7 @@
         barDiv.innerHTML =
           "<h3 class='text-lg font-bold mt-6 mb-2'>🍺 Bars les plus proches :</h3>";
 
-        bars.forEach((bar, index) => {
+        for (const [index, bar] of bars.entries()) {
           const barIcon = L.divIcon({
             className: "custom-div-icon",
             html: `<div style="background:#${
@@ -243,8 +243,43 @@
             bar.adresse
           }<br>💶 ${bar.prix} — 🖏 ${bar.distance_m} m`;
 
+          const table = document.createElement("div");
+          table.className = `grid grid-cols-${coords.length} gap-4 mt-4`;
+
+          await Promise.all(
+            coords.map(async (c) => {
+              const cell = document.createElement("div");
+              try {
+                const res = await fetch(
+                  "https://boire-facile-api.onrender.com/directions",
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      origin: `${c.lat},${c.lon}`,
+                      destination: `${bar.latitude},${bar.longitude}`,
+                    }),
+                  }
+                );
+                const data = await res.json();
+                const steps = data.steps || [];
+                const duration = data.duration || "?";
+
+                cell.innerHTML = `<div class='bg-gray-50 p-3 rounded shadow-sm'><strong>${
+                  c.name
+                }</strong><br><span class='text-gray-600'>(Durée : ${duration})</span><ul class='list-disc ml-5 mt-1'>${steps
+                  .map((s) => `<li>${s}</li>`)
+                  .join("")}</ul></div>`;
+              } catch (err) {
+                cell.innerHTML = `<div class='bg-red-100 p-2 rounded mt-2'>${c.name} : Erreur lors de l'itinéraire.</div>`;
+              }
+              table.appendChild(cell);
+            })
+          );
+
+          barBlock.appendChild(table);
           barDiv.appendChild(barBlock);
-        });
+        }
 
         document.getElementById("result").appendChild(barDiv);
       }
