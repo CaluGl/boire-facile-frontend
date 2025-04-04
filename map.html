@@ -33,9 +33,7 @@
             if (bar.latitude && bar.longitude) {
               const marker = L.marker([bar.latitude, bar.longitude])
                 .addTo(map)
-                .bindPopup(
-                  `<strong>${bar.nom}</strong><br>${bar.adresse}<br>💶 ${bar.prix}`
-                );
+                .bindPopup(`<strong>${bar.nom}</strong><br>${bar.adresse}<br>💶 ${bar.prix}<br>🕒 Happy Hour : ${bar.happy_hour || "Non renseigné"}`);
             }
           });
         })
