@@ -12,10 +12,9 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </head>
   <body
-  class="min-h-screen flex flex-col items-center justify-start p-4 sm:p-8 space-y-8 bg-cover bg-center"
-  style="background-image: url('./photo.jpg');"
->
-
+    class="min-h-screen flex flex-col items-center justify-start p-4 sm:p-8 space-y-8 bg-cover bg-center"
+    style="background-image: url('./photo.jpg')"
+  >
     <div class="bg-white shadow-lg rounded p-4 sm:p-6 max-w-6xl w-full">
       <h1 class="text-2xl font-bold mb-4">🍻 Boire Facile — Session</h1>
       <p class="mb-4" id="session-id">Chargement de la session...</p>
@@ -33,7 +32,7 @@
           onclick="calculateCenter()"
           class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
-          📍 Calculer le point central
+          📍 Trouver un bar à mi-chemin
         </button>
       </div>
 
@@ -221,7 +220,7 @@
 
         const barDiv = document.createElement("div");
         barDiv.innerHTML =
-          "<h3 class='text-lg font-bold mt-6 mb-2'>🍺 Bars les plus proches (prix happy hour):</h3>";
+          "<h3 class='text-lg font-bold mt-6 mb-2'>🍺 Bars les plus proches :</h3>";
 
         for (const [index, bar] of bars.entries()) {
           const barIcon = L.divIcon({
@@ -246,7 +245,9 @@
           barBlock.className = "bg-white p-3 rounded shadow mb-4";
           barBlock.innerHTML = `<strong>${index + 1}. ${bar.nom}</strong><br>${
             bar.adresse
-          }<br>💶 ${bar.prix} — 🖏 ${bar.distance_m} m`;
+          }<br>💶 ${bar.prix} — 🕒 ${bar.happy_hour || "Non renseigné"} — 🖏 ${
+            bar.distance_m
+          } m`;
 
           const scrollWrapper = document.createElement("div");
           scrollWrapper.className = "overflow-x-auto";
@@ -281,7 +282,7 @@
                   });
 
                 cell.innerHTML = `
-                  <div class='bg-gray-50 p-3 rounded shadow-sm text-center text-sm whitespace-normal break-words w-32'>
+                  <div class='bg-gray-50 p-3 rounded shadow-sm text-center text-sm whitespace-normal break-words'>
                     <div class="font-semibold">${c.name}</div>
                     <div class="text-gray-600">⏱ ${duration}</div>
                     <div class="text-blue-700">🚇 ${
