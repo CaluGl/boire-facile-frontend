@@ -250,7 +250,7 @@
           scrollWrapper.className = "overflow-x-auto";
 
           const table = document.createElement("div");
-          table.className = `min-w-max grid grid-cols-${coords.length} gap-4 mt-4`;
+          table.className = `min-w-max flex gap-4 mt-4`;
 
           await Promise.all(
             coords.map(async (c) => {
