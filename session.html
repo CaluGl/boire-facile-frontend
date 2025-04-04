@@ -84,50 +84,52 @@
         addressInput.setAttribute("data-type", "address");
         addressInput.value = address;
       
-        nameInput.addEventListener("change", saveParticipants);
-        addressInput.addEventListener("change", saveParticipants);
+        // Sauvegarde live à chaque frappe
+        nameInput.addEventListener("input", saveParticipants);
+        addressInput.addEventListener("input", saveParticipants);
       
         div.appendChild(nameInput);
         div.appendChild(addressInput);
         container.appendChild(div);
       }
 
+
       async function loadParticipants() {
-        const res = await fetch(
-          `https://boire-facile-api.onrender.com/get_participants?id=${sessionId}`
-        );
+        const res = await fetch(`https://boire-facile-api.onrender.com/get_participants?id=${sessionId}`);
         const data = await res.json();
-        if (data && data.participants) {
-          data.participants.forEach((p) => addAddressField(p.name, p.address));
-        } else {
-          addAddressField(); // Au moins un champ vide
+        const participants = data.participants || [];
+      
+        if (participants.length === 0) {
+          // Ne rien afficher s'il n'y a rien
+          return;
         }
+      
+        participants.forEach((p) => addAddressField(p.name, p.address));
       }
+
 
       loadParticipants();
 
       async function saveParticipants() {
         const rows = document.querySelectorAll("#addresses .flex");
         const participants = [];
-
+      
         rows.forEach((row) => {
-          const name = row
-            .querySelector("input[data-type='name']")
-            .value.trim();
-          const address = row
-            .querySelector("input[data-type='address']")
-            .value.trim();
-          if (address) {
+          const name = row.querySelector("input[data-type='name']").value.trim();
+          const address = row.querySelector("input[data-type='address']").value.trim();
+      
+          if (name || address) {
             participants.push({ name, address });
           }
         });
-
+      
         await fetch("https://boire-facile-api.onrender.com/save_participants", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ sessionId, participants }),
         });
       }
+
 
       async function calculateCenter() {
         const rows = document.querySelectorAll("#addresses .flex");
