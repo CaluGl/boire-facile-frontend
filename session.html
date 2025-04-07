@@ -5,40 +5,30 @@
     <title>Mi-chemin 🍻</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+      .geolocation-button:hover svg {
+        stroke: #9333ea;
+      }
+    </style>
   </head>
-  <body
-    class="min-h-screen flex flex-col items-center justify-start p-4 sm:p-8 space-y-8 bg-cover bg-center"
-    style="background-image: url('./photo.jpg')"
-  >
+  <body class="min-h-screen flex flex-col items-center justify-start p-4 sm:p-8 space-y-8 bg-cover bg-center" style="background-image: url('./photo.jpg')">
     <div class="bg-white shadow-lg rounded p-4 sm:p-6 max-w-6xl w-full">
       <h1 class="text-2xl font-bold mb-4">🍻 Mi-chemin — Session</h1>
       <p class="mb-4" id="session-id">Chargement de la session...</p>
       <div class="mb-4">
-        <button
-          onclick="copyLink()"
-          class="bg-yellow-400 text-white px-4 py-2 rounded hover:bg-yellow-500"
-        >
+        <button onclick="copyLink()" class="bg-yellow-400 text-white px-4 py-2 rounded hover:bg-yellow-500">
           🔗 Copier le lien de cette session
         </button>
       </div>
       <div id="addresses" class="space-y-2 mb-4"></div>
 
       <div class="flex flex-wrap gap-4 mb-4">
-        <button
-          onclick="addAddressField()"
-          class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-        >
+        <button onclick="addAddressField()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
           ➕ Ajouter une adresse
         </button>
-        <button
-          onclick="calculateCenter()"
-          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
+        <button onclick="calculateCenter()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
           📍 Trouver un bar pas cher à mi-chemin
         </button>
       </div>
@@ -47,10 +37,7 @@
       <div id="directions" class="mt-4 text-left text-sm space-y-4"></div>
     </div>
 
-    <div
-      id="map"
-      class="w-full max-w-6xl h-64 sm:h-[500px] rounded shadow-md"
-    ></div>
+    <div id="map" class="w-full max-w-6xl h-64 sm:h-[500px] rounded shadow-md"></div>
 
     <script>
       const sessionId = new URLSearchParams(window.location.search).get("id");
@@ -66,6 +53,7 @@
         const div = document.createElement("div");
         div.className = "flex gap-2";
 
+        // Name input
         const nameInput = document.createElement("input");
         nameInput.type = "text";
         nameInput.placeholder = "Prénom";
@@ -73,122 +61,130 @@
         nameInput.setAttribute("data-type", "name");
         nameInput.value = name;
 
+        // Address input container
+        const addressWrapper = document.createElement("div");
+        addressWrapper.className = "flex items-center gap-1 w-2/3";
+
+        // Address input
         const addressInput = document.createElement("input");
         addressInput.type = "text";
         addressInput.placeholder = "Adresse";
-        addressInput.className = "p-2 border rounded w-2/3";
+        addressInput.className = "p-2 border rounded flex-grow";
         addressInput.setAttribute("data-type", "address");
         addressInput.value = address;
 
+        // Geolocation button
+        const geoButton = document.createElement("button");
+        geoButton.type = "button";
+        geoButton.className = "geolocation-button p-2 hover:bg-gray-100 rounded-full";
+        geoButton.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2">
+            <path d="M12 2c3.866 0 7 3.134 7 7 0 5.25-7 13-7 13S5 14.25 5 9c0-3.866 3.134-7 7-7z"/>
+            <circle cx="12" cy="9" r="2.5"/>
+          </svg>
+        `;
+        geoButton.onclick = () => getLocationForAddress(addressInput);
+
+        // Assemble elements
+        addressWrapper.appendChild(addressInput);
+        addressWrapper.appendChild(geoButton);
+        div.appendChild(nameInput);
+        div.appendChild(addressWrapper);
+        container.appendChild(div);
+
         nameInput.addEventListener("input", debounceSave);
         addressInput.addEventListener("input", debounceSave);
-
-        div.appendChild(nameInput);
-        div.appendChild(addressInput);
-        container.appendChild(div);
       }
 
-      async function loadParticipants() {
-        const res = await fetch(
-          `https://boire-facile-api.onrender.com/get_participants?id=${sessionId}`
-        );
-        const data = await res.json();
-        const participants = data.participants || [];
-
-        if (participants.length === 0) {
-          addAddressField();
-        } else {
-          participants.forEach((p) => addAddressField(p.name, p.address));
-        }
-      }
-
-      async function saveParticipants() {
-        const rows = document.querySelectorAll("#addresses .flex");
-        const participants = [];
-
-        rows.forEach((row) => {
-          const name = row
-            .querySelector("input[data-type='name']")
-            .value.trim();
-          const address = row
-            .querySelector("input[data-type='address']")
-            .value.trim();
-          if (name || address) {
-            participants.push({ name, address });
-          }
-        });
-
-        await fetch("https://boire-facile-api.onrender.com/save_participants", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId, participants }),
-        });
-      }
-
-      function debounce(func, wait = 500) {
-        let timeout;
-        return function (...args) {
-          clearTimeout(timeout);
-          timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-      }
-
-      const debounceSave = debounce(saveParticipants);
-
-      loadParticipants();
-      function copyLink() {
-        const link = `${window.location.origin}${window.location.pathname}?id=${sessionId}`;
-        navigator.clipboard.writeText(link).then(() => {
-          alert("Lien copié dans le presse-papiers !");
-        });
-      }
-      async function calculateCenter() {
-        const rows = document.querySelectorAll("#addresses .flex");
-        const coords = [];
-
-        for (let row of rows) {
-          const name = row
-            .querySelector("input[data-type='name']")
-            .value.trim();
-          const address = row
-            .querySelector("input[data-type='address']")
-            .value.trim();
-          if (!address) continue;
-
-          const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
-            address
-          )}`;
+      async function reverseGeocode(lat, lon) {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+        try {
           const response = await fetch(url, {
             headers: { "User-Agent": "BoireFacile/1.0" },
           });
           const data = await response.json();
-          if (data.length > 0) {
+          return data.address || {};
+        } catch (error) {
+          console.error("Reverse geocoding error:", error);
+          return null;
+        }
+      }
+
+      function getLocationForAddress(addressInput) {
+        if (!navigator.geolocation) {
+          alert("La géolocalisation n'est pas supportée par votre navigateur");
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            
+            const addressData = await reverseGeocode(lat, lon);
+            const address = addressData 
+              ? `${addressData.road || ''} ${addressData.house_number || ''}, ${addressData.postcode || ''} ${addressData.city || ''}`
+              : `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+
+            addressInput.value = address;
+            debounceSave();
+          },
+          (error) => {
+            alert(`Erreur de géolocalisation: ${error.message}`);
+          }
+        );
+      }
+
+      async function calculateCenter() {
+        const rows = document.querySelectorAll("#addresses > .flex");
+        const coords = [];
+
+        for (let row of rows) {
+          try {
+            const name = row.querySelector("input[data-type='name']").value.trim();
+            const address = row.querySelector("input[data-type='address']").value.trim();
+            if (!address) continue;
+
+            // Check for coordinate format
+            const isCoords = address.match(/^-?\d+\.?\d*,-?\d+\.?\d*$/);
+            let lat, lon;
+
+            if (isCoords) {
+              [lat, lon] = address.split(",").map(parseFloat);
+            } else {
+              const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`;
+              const response = await fetch(url, {
+                headers: { "User-Agent": "BoireFacile/1.0" },
+              });
+              const data = await response.json();
+              if (!data || data.length === 0) continue;
+              lat = parseFloat(data[0].lat);
+              lon = parseFloat(data[0].lon);
+            }
+
             coords.push({
               name,
-              lat: parseFloat(data[0].lat),
-              lon: parseFloat(data[0].lon),
+              lat,
+              lon,
               address,
               label: name ? `${name} — ${address}` : address,
             });
+          } catch (error) {
+            console.error("Error processing address:", error);
           }
         }
 
         if (coords.length === 0) {
-          document.getElementById("result").innerText =
-            "❌ Aucune adresse valide.";
+          document.getElementById("result").innerText = "❌ Aucune adresse valide.";
           return;
         }
 
-        const avgLat =
-          coords.reduce((sum, c) => sum + c.lat, 0) / coords.length;
-        const avgLon =
-          coords.reduce((sum, c) => sum + c.lon, 0) / coords.length;
+        const avgLat = coords.reduce((sum, c) => sum + c.lat, 0) / coords.length;
+        const avgLon = coords.reduce((sum, c) => sum + c.lon, 0) / coords.length;
         window.currentCenter = { lat: avgLat, lon: avgLon };
 
         const link = `https://www.google.com/maps/search/bar/@${avgLat},${avgLon},16z`;
-        document.getElementById(
-          "result"
-        ).innerHTML = `✅ Bars autour du point central :<br><a href="${link}" target="_blank" class="text-blue-600 underline">Voir sur Google Maps</a>`;
+        document.getElementById("result").innerHTML = `✅ Bars autour du point central :<br><a href="${link}" target="_blank" class="text-blue-600 underline">Voir sur Google Maps</a>`;
 
         if (!map) {
           map = L.map("map");
@@ -208,114 +204,4 @@
         const centerMarker = L.marker([avgLat, avgLon], {
           icon: L.icon({
             iconUrl: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-          }),
-        })
-          .addTo(map)
-          .bindPopup("Point central");
-        markers.push(centerMarker);
-
-        const group = new L.featureGroup(markers);
-        map.fitBounds(group.getBounds().pad(0.2));
-
-        const barResponse = await fetch(
-          "https://boire-facile-api.onrender.com/closest_bars",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ lat: avgLat, lon: avgLon }),
-          }
-        );
-        const barData = await barResponse.json();
-        const bars = barData.bars || [];
-
-        const barDiv = document.createElement("div");
-        barDiv.innerHTML =
-          "<h3 class='text-lg font-bold mt-6 mb-2'>🍺 Bars les plus proches :</h3>";
-
-        for (const [index, bar] of bars.entries()) {
-          const barIcon = L.divIcon({
-            className: "custom-div-icon",
-            html: `<div style="background:#${
-              ["0074D9", "FF851B", "2ECC40"][index]
-            };color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:bold">${
-              index + 1
-            }</div>`,
-          });
-
-          if (bar.latitude && bar.longitude) {
-            const barMarker = L.marker([bar.latitude, bar.longitude], {
-              icon: barIcon,
-            })
-              .addTo(map)
-              .bindPopup(`${bar.nom}<br>${bar.adresse}<br>💶 ${bar.prix}<br>🕒 Happy Hour : ${bar.happy_hour || 'Non renseigné'}`)
-            markers.push(barMarker);
-          }
-
-          const barBlock = document.createElement("div");
-          barBlock.className = "bg-white p-3 rounded shadow mb-4";
-          barBlock.innerHTML = `<strong>${index + 1}. ${bar.nom}</strong><br>${
-            bar.adresse
-          }<br>💶 ${bar.prix} — 🕒 Happy Hour : ${
-            bar.happy_hour || "Non renseigné"
-          } — 🖏 ${bar.distance_m} m`;
-
-          const scrollWrapper = document.createElement("div");
-          scrollWrapper.className = "overflow-x-auto";
-
-          const table = document.createElement("div");
-          table.className = `min-w-max flex gap-4 mt-4 justify-center`;
-
-          await Promise.all(
-            coords.map(async (c) => {
-              const cell = document.createElement("div");
-              try {
-                const res = await fetch(
-                  "https://boire-facile-api.onrender.com/directions",
-                  {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      origin: `${c.lat},${c.lon}`,
-                      destination: `${bar.latitude},${bar.longitude}`,
-                    }),
-                  }
-                );
-                const data = await res.json();
-                const steps = data.steps || [];
-                const duration = data.duration || "?";
-
-                const lignes = steps
-                  .filter((s) => s.includes("🚌"))
-                  .map((s) => {
-                    const match = s.match(/🚌 (.*?) de/);
-                    return match ? match[1] : "🚌 ?";
-                  });
-
-                cell.innerHTML = `
-                  <div class='bg-gray-50 p-3 rounded shadow-sm text-center text-sm whitespace-normal break-words'>
-                    <div class="font-semibold">${c.name}</div>
-                    <div class="text-gray-600">⏱ ${duration}</div>
-                    <div class="text-blue-700">🚇 ${
-                      lignes.join(", ") || "-"
-                    }</div>
-                  </div>
-                `;
-              } catch (err) {
-                cell.innerHTML = `<div class='bg-red-100 p-2 rounded mt-2'>${c.name} : Erreur</div>`;
-              }
-              table.appendChild(cell);
-            })
-          );
-
-          scrollWrapper.appendChild(table);
-          barBlock.appendChild(scrollWrapper);
-          barDiv.appendChild(barBlock);
-        }
-
-        document.getElementById("result").appendChild(barDiv);
-      }
-    </script>
-  </body>
-</html>
+            iconSize
