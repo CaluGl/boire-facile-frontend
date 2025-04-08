@@ -33,18 +33,15 @@ function shareOnWhatsApp() {
     return;
   }
   const link = `${window.location.origin}/session.html?id=${sessionId}`;
-  const message = `Rejoignez-moi sur Mi-Chemin ! Voici le lien de la session : ${link}`;
+  const message = `Beuverie ! Voici le lien de la session : ${link}`;
   const whatsappURL = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
   window.open(whatsappURL, "_blank");
 }
 
 // Function to share the session link via Facebook
 function shareOnFacebook() {
-  if (!sessionId) {
-    alert("Veuillez générer un lien avant de partager.");
-    return;
-  }
-  const link = `${window.location.origin}/session.html?id=${sessionId}`;
-  const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
-  window.open(facebookURL, "_blank");
+  const link = `${window.location.origin}${window.location.pathname}?id=${sessionId}`;
+  const message = `Beuverie ! Voici le lien de la session : ${link}`;
+  const messengerURL = `https://m.me/?text=${encodeURIComponent(message)}`;
+  window.open(messengerURL, "_blank");
 }
