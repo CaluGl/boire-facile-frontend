@@ -22,3 +22,28 @@ function copyLink() {
       alert("Erreur lors de la copie du lien.");
     });
 }
+function shareLink(platform) {
+  const link = `${window.location.origin}${window.location.pathname}?id=${sessionId}`;
+  const encodedLink = encodeURIComponent(link);
+
+  let shareUrl = "";
+
+  switch (platform) {
+    case "facebook":
+      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedLink}`;
+      break;
+    case "whatsapp":
+      shareUrl = `https://api.whatsapp.com/send?text=Rejoins-moi ici : ${encodedLink}`;
+      break;
+    case "instagram":
+      alert(
+        "Instagram ne supporte pas directement le partage de liens. Vous pouvez copier le lien et le coller dans votre story ou message."
+      );
+      return; // Pas de redirection pour Instagram
+    default:
+      alert("Plateforme inconnue.");
+      return;
+  }
+
+  window.open(shareUrl, "_blank");
+}
