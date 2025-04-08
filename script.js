@@ -1,6 +1,9 @@
+let sessionId = null; // Define sessionId globally to make it accessible to all functions
+
+// Function to generate the session link
 function generateLink() {
-  const id = 'session-' + Math.random().toString(36).substring(2, 8);
-  const sessionURL = `session.html?id=${id}`;
+  sessionId = 'session-' + Math.random().toString(36).substring(2, 8); // Generate session ID
+  const sessionURL = `session.html?id=${sessionId}`;
 
   const linkContainer = document.getElementById('link-container');
   const link = document.getElementById('link');
@@ -10,6 +13,7 @@ function generateLink() {
   linkContainer.classList.remove('hidden');
 }
 
+// Function to copy the session link to the clipboard
 function copyLink() {
   const linkElement = document.getElementById("link");
   const text = linkElement.href;
@@ -22,22 +26,26 @@ function copyLink() {
       alert("Erreur lors de la copie du lien.");
     });
 }
+
+// Function to share the session link via WhatsApp
 function shareOnWhatsApp() {
-  const link = `${window.location.origin}${window.location.pathname}?id=${sessionId}`;
+  if (!sessionId) {
+    alert("Veuillez générer un lien avant de partager.");
+    return;
+  }
+  const link = `${window.location.origin}/session.html?id=${sessionId}`;
   const message = `Rejoignez-moi sur Mi-Chemin ! Voici le lien de la session : ${link}`;
   const whatsappURL = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
   window.open(whatsappURL, "_blank");
 }
 
+// Function to share the session link via Facebook
 function shareOnFacebook() {
-  const link = `${window.location.origin}${window.location.pathname}?id=${sessionId}`;
+  if (!sessionId) {
+    alert("Veuillez générer un lien avant de partager.");
+    return;
+  }
+  const link = `${window.location.origin}/session.html?id=${sessionId}`;
   const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
   window.open(facebookURL, "_blank");
-}
-
-function copyLink() {
-  const link = `${window.location.origin}${window.location.pathname}?id=${sessionId}`;
-  navigator.clipboard.writeText(link).then(() => {
-    alert("Lien copié dans le presse-papiers !");
-  });
 }
