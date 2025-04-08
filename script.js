@@ -1,4 +1,3 @@
-let sessionId = null; // Define sessionId globally to make it accessible to all functions
 
 // Function to generate the session link
 function generateLink() {
