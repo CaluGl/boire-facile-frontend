@@ -22,28 +22,22 @@ function copyLink() {
       alert("Erreur lors de la copie du lien.");
     });
 }
-function shareLink(platform) {
+function shareOnWhatsApp() {
   const link = `${window.location.origin}${window.location.pathname}?id=${sessionId}`;
-  const encodedLink = encodeURIComponent(link);
+  const message = `Rejoignez-moi sur Mi-Chemin ! Voici le lien de la session : ${link}`;
+  const whatsappURL = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+  window.open(whatsappURL, "_blank");
+}
 
-  let shareUrl = "";
+function shareOnFacebook() {
+  const link = `${window.location.origin}${window.location.pathname}?id=${sessionId}`;
+  const facebookURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
+  window.open(facebookURL, "_blank");
+}
 
-  switch (platform) {
-    case "facebook":
-      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedLink}`;
-      break;
-    case "whatsapp":
-      shareUrl = `https://api.whatsapp.com/send?text=Rejoins-moi ici : ${encodedLink}`;
-      break;
-    case "instagram":
-      alert(
-        "Instagram ne supporte pas directement le partage de liens. Vous pouvez copier le lien et le coller dans votre story ou message."
-      );
-      return; // Pas de redirection pour Instagram
-    default:
-      alert("Plateforme inconnue.");
-      return;
-  }
-
-  window.open(shareUrl, "_blank");
+function copyLink() {
+  const link = `${window.location.origin}${window.location.pathname}?id=${sessionId}`;
+  navigator.clipboard.writeText(link).then(() => {
+    alert("Lien copié dans le presse-papiers !");
+  });
 }
