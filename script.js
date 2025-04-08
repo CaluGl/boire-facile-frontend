@@ -41,7 +41,7 @@ function shareOnWhatsApp() {
 // Function to share the session link via Facebook
 function shareOnFacebook() {
   const link = `${window.location.origin}${window.location.pathname}?id=${sessionId}`;
-  const message = `Beuverie ! Voici le lien de la session : ${link}`;
-  const messengerURL = `https://m.me/?text=${encodeURIComponent(message)}`;
+  const message = `Rejoignez-moi sur Mi-Chemin ! Voici le lien de la session : ${link}`;
+  const messengerURL = `https://www.facebook.com/messages/t/?text=${encodeURIComponent(message)}`;
   window.open(messengerURL, "_blank");
 }
