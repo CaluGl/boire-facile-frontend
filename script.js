@@ -1,7 +1,7 @@
 
 // Function to generate the session link
-      function generateLink() {
-        const sessionId = 'session-' + Math.random().toString(36).substring(2, 8);
+function generateLink() {
+      const sessionId = 'session-' + Math.random().toString(36).substring(2, 8);
         const sessionURL = `session.html?id=${sessionId}`;
         
         // Copie dans le presse-papiers
