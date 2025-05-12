@@ -236,7 +236,8 @@
         const link = `https://www.google.com/maps/search/bar/@${avgLat},${avgLon},16z`;
         document.getElementById(
           "result"
-        ).innerHTML = `✅ Bars autour du point central :<br><a href="${link}" target="_blank" class="text-blue-600 underline">Voir sur Google Maps</a>`;
+        ).innerHTML = `<span class="text-white">✅ Bars autour du point central :</span><br>
+   <a href="${link}" target="_blank" class="text-blue-600 underline">Voir sur Google Maps</a>`;
 
         if (!map) {
           map = L.map("map");
