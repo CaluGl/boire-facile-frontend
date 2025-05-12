@@ -40,10 +40,22 @@
         Voir tous les bars
       </button>
     </div>
-
-    <!-- Texte en bas à droite -->
-    <div class="absolute bottom-4 right-4 text-white text-3xl font-light text-right z-10">
-      Pour les sacoches<br>et les rien en poche
-    </div>
+  <script>
+      function generateLink() {
+        const sessionId = 'session-' + Math.random().toString(36).substring(2, 8);
+        const sessionURL = `session.html?id=${sessionId}`;
+        
+        // Copie dans le presse-papiers
+        navigator.clipboard.writeText(window.location.origin + '/' + sessionURL)
+          .then(() => {
+            // Ouverture dans un nouvel onglet après la copie
+            window.open(sessionURL, '_blank');
+          })
+          .catch(() => {
+            alert("Erreur de copie - le lien s'ouvre quand même");
+            window.open(sessionURL, '_blank');
+          });
+      }
+    </script>
   </body>
 </html>
