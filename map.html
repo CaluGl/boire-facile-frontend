@@ -2,7 +2,7 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <title>Carte des bars 🍻</title>
+    <title>Bars Paris</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link
@@ -10,33 +10,40 @@
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+    </style>
   </head>
-  <body class="bg-gray-100 min-h-screen p-6">
-    <div class="max-w-6xl mx-auto">
-      <h1 class="text-3xl font-bold mb-4 text-center">
-        🍻 Carte des bars pas chers à Paris
-      </h1>
-      
-      <!-- Barre de recherche -->
-      <div class="mb-4 max-w-xl mx-auto">
-        <div class="flex gap-2">
-          <input
-            type="text"
-            id="searchInput"
-            placeholder="Rechercher une adresse à Paris..."
-            class="flex-grow p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-          <button
-            id="searchButton"
-            class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Rechercher
-          </button>
-        </div>
+  <body class="min-h-screen">
+    <!-- Barre de recherche compacte -->
+    <div class="absolute top-4 left-4 z-[1000] max-w-xs w-full shadow-lg">
+      <div class="flex gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1.5">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Recherche adresse..."
+          class="flex-grow text-sm px-2 py-1 border-none rounded-md focus:ring-0 bg-transparent"
+        />
+        <button
+          id="searchButton"
+          class="text-sm bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition-colors"
+        >
+          →
+        </button>
       </div>
-
-      <div id="map" class="w-full h-[80vh] rounded-lg shadow-lg"></div>
     </div>
+
+    <div id="map"></div>
 
     <script>
       const map = L.map("map").setView([48.8566, 2.3522], 13);
@@ -55,7 +62,12 @@
               L.marker([bar.latitude, bar.longitude])
                 .addTo(map)
                 .bindPopup(
-                  `<strong>${bar.nom}</strong><br>${bar.adresse}<br>💶 ${bar.prix}<br>🕒 Happy Hour : ${bar.happy_hour || "Non renseigné"}`
+                  `<div class="text-sm">
+                    <strong class="font-semibold">${bar.nom}</strong><br>
+                    <span class="text-gray-600">${bar.adresse}</span><br>
+                    <span class="text-green-700">💶 ${bar.prix}</span><br>
+                    <span class="text-blue-600">🕒 ${bar.happy_hour || "Pas d'HH"}</span>
+                   </div>`
                 );
             }
           });
@@ -88,10 +100,8 @@
                 })
               })
                 .addTo(map)
-                .bindPopup(`Résultat de recherche:<br>${result.display_name}`)
+                .bindPopup(`<div class="text-sm">📍 ${result.display_name}</div>`)
                 .openPopup();
-            } else {
-              alert("Aucun résultat trouvé 😞");
             }
           });
       };
