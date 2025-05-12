@@ -1,30 +1,20 @@
 
 // Function to generate the session link
-function generateLink() {
-  sessionId = 'session-' + Math.random().toString(36).substring(2, 8); // Generate session ID
-  const sessionURL = `session.html?id=${sessionId}`;
-
-  const linkContainer = document.getElementById('link-container');
-  const link = document.getElementById('link');
-
-  link.href = sessionURL;
-  link.innerText = window.location.origin + '/' + sessionURL;
-  linkContainer.classList.remove('hidden');
-}
-
-// Function to copy the session link to the clipboard
-function copyLink() {
-  const linkElement = document.getElementById("link");
-  const text = linkElement.href;
-
-  navigator.clipboard.writeText(text)
-    .then(() => {
-      alert("Lien copié dans le presse-papiers !");
-    })
-    .catch(() => {
-      alert("Erreur lors de la copie du lien.");
-    });
-}
+      function generateLink() {
+        const sessionId = 'session-' + Math.random().toString(36).substring(2, 8);
+        const sessionURL = `session.html?id=${sessionId}`;
+        
+        // Copie dans le presse-papiers
+        navigator.clipboard.writeText(window.location.origin + '/' + sessionURL)
+          .then(() => {
+            // Ouverture dans un nouvel onglet après la copie
+            window.open(sessionURL, '_blank');
+          })
+          .catch(() => {
+            alert("Erreur de copie - le lien s'ouvre quand même");
+            window.open(sessionURL, '_blank');
+          });
+      }
 
 // Function to share the session link via WhatsApp
 function shareOnWhatsApp() {
