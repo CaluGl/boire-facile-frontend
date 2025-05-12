@@ -1,115 +1,142 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8">
     <title>Bars Paris</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-      body {
-        margin: 0;
-        padding: 0;
-      }
-      #map {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-      }
+        body { margin: 0; padding: 0; }
+        #map { position: fixed; top: 0; bottom: 0; left: 0; right: 0; }
+        .suggestions { 
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
     </style>
-  </head>
-  <body class="min-h-screen">
-    <!-- Barre de recherche compacte -->
+</head>
+<body class="min-h-screen">
     <div class="absolute top-4 left-4 z-[1000] max-w-xs w-full shadow-lg">
-      <div class="flex gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1.5">
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Recherche adresse..."
-          class="flex-grow text-sm px-2 py-1 border-none rounded-md focus:ring-0 bg-transparent"
-        />
-        <button
-          id="searchButton"
-          class="text-sm bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition-colors"
-        >
-          →
-        </button>
-      </div>
+        <div class="relative">
+            <div class="flex gap-1 bg-white/90 backdrop-blur-sm rounded-lg p-1.5">
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Recherche adresse..."
+                    class="flex-grow text-sm px-2 py-1 border-none rounded-md focus:ring-0 bg-transparent"
+                    autocomplete="off"
+                />
+                <button
+                    id="searchButton"
+                    class="text-sm bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition-colors"
+                >
+                    →
+                </button>
+            </div>
+            <div id="suggestions" class="hidden mt-1 bg-white/90 backdrop-blur-sm rounded-lg suggestions"></div>
+        </div>
     </div>
 
     <div id="map"></div>
 
     <script>
-      const map = L.map("map").setView([48.8566, 2.3522], 13);
-      let searchMarker = null;
+        const map = L.map('map').setView([48.8566, 2.3522], 13);
+        let searchMarker = null;
+        let timeoutId;
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
-      }).addTo(map);
+        // Configuration de la carte
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
 
-      // Chargement des bars
-      fetch("https://boire-facile-api.onrender.com/all_bars")
-        .then((res) => res.json())
-        .then((data) => {
-          data.bars.forEach((bar) => {
-            if (bar.latitude && bar.longitude) {
-              L.marker([bar.latitude, bar.longitude])
-                .addTo(map)
-                .bindPopup(
-                  `<div class="text-sm">
-                    <strong class="font-semibold">${bar.nom}</strong><br>
-                    <span class="text-gray-600">${bar.adresse}</span><br>
-                    <span class="text-green-700">💶 ${bar.prix}</span><br>
-                    <span class="text-blue-600">🕒 ${bar.happy_hour || "Pas d'HH"}</span>
-                   </div>`
-                );
-            }
-          });
-        })
-        .catch(console.error);
+        // Chargement des bars
+        fetch('https://boire-facile-api.onrender.com/all_bars')
+            .then(res => res.json())
+            .then(data => {
+                data.bars.forEach(bar => {
+                    if(bar.latitude && bar.longitude) {
+                        L.marker([bar.latitude, bar.longitude])
+                            .addTo(map)
+                            .bindPopup(`
+                                <div class="text-sm">
+                                    <strong class="font-semibold">${bar.nom}</strong><br>
+                                    <span class="text-gray-600">${bar.adresse}</span><br>
+                                    <span class="text-green-700">💶 ${bar.prix}</span><br>
+                                    <span class="text-blue-600">🕒 ${bar.happy_hour || "Pas d'HH"}</span>
+                                </div>
+                            `);
+                    }
+                });
+            })
+            .catch(console.error);
 
-      // Gestion de la recherche
-      const performSearch = () => {
-        const query = document.getElementById("searchInput").value;
-        if (!query) return;
+        // Gestion de l'autocomplétion
+        const showSuggestions = (results) => {
+            const container = document.getElementById('suggestions');
+            container.innerHTML = '';
+            container.classList.remove('hidden');
 
-        fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-            query + " Paris"
-          )}&limit=1&viewbox=2.2241,48.8156,2.4699,48.9022&bounded=1`
-        )
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.length > 0) {
-              const result = data[0];
-              map.setView([result.lat, result.lon], 16);
-              
-              if (searchMarker) searchMarker.remove();
-              
-              searchMarker = L.marker([result.lat, result.lon], {
+            results.forEach(result => {
+                const div = document.createElement('div');
+                div.className = 'px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer truncate';
+                div.textContent = result.display_name;
+                div.onclick = () => selectSuggestion(result);
+                container.appendChild(div);
+            });
+        };
+
+        const selectSuggestion = (result) => {
+            document.getElementById('searchInput').value = result.display_name;
+            document.getElementById('suggestions').classList.add('hidden');
+            moveToLocation(result);
+        };
+
+        const moveToLocation = (result) => {
+            map.setView([result.lat, result.lon], 16);
+            
+            if(searchMarker) searchMarker.remove();
+            
+            searchMarker = L.marker([result.lat, result.lon], {
                 icon: L.icon({
-                  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-                  iconSize: [25, 41],
-                  iconAnchor: [12, 41]
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41]
                 })
-              })
-                .addTo(map)
-                .bindPopup(`<div class="text-sm">📍 ${result.display_name}</div>`)
-                .openPopup();
-            }
-          });
-      };
+            }).addTo(map).bindPopup(`<div class="text-sm">📍 ${result.display_name}</div>`).openPopup();
+        };
 
-      document.getElementById("searchButton").addEventListener("click", performSearch);
-      document.getElementById("searchInput").addEventListener("keypress", (e) => {
-        if (e.key === "Enter") performSearch();
-      });
+        // Recherche avec debounce
+        const handleSearchInput = (query) => {
+            clearTimeout(timeoutId);
+            
+            if(query.length < 3) {
+                document.getElementById('suggestions').classList.add('hidden');
+                return;
+            }
+
+            timeoutId = setTimeout(() => {
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ' Paris')}&limit=5&viewbox=2.2241,48.8156,2.4699,48.9022&bounded=1`)
+                    .then(res => res.json())
+                    .then(showSuggestions)
+                    .catch(() => document.getElementById('suggestions').classList.add('hidden'));
+            }, 300);
+        };
+
+        // Événements
+        document.getElementById('searchInput').addEventListener('input', (e) => handleSearchInput(e.target.value));
+        document.getElementById('searchButton').addEventListener('click', () => {
+            const query = document.getElementById('searchInput').value;
+            if(query) handleSearchInput(query);
+        });
+
+        // Fermer les suggestions en cliquant à l'extérieur
+        document.addEventListener('click', (e) => {
+            if(!e.target.closest('.relative')) {
+                document.getElementById('suggestions').classList.add('hidden');
+            }
+        });
     </script>
-  </body>
+</body>
 </html>
