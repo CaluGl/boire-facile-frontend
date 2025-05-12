@@ -15,9 +15,10 @@
     class="min-h-screen flex flex-col items-center justify-start p-4 sm:p-8 space-y-8 bg-cover bg-center"
     style="background-image: url('./photo.png')"
   >
-    <div class="bg-white shadow-lg rounded p-4 sm:p-6 max-w-6xl w-full">
-      <h1 class="text-2xl font-bold mb-4">🍻 Mi-chemin — Session</h1>
-      <p class="mb-4" id="session-id">Chargement de la session...</p>
+  <div class="absolute top-4 left-4 z-20 bg-white/20 backdrop-blur-lg rounded-lg p-4 shadow-sm">
+    <h1 class="text-2xl font-bold text-white">🍻 Mi-chemin — Session</h1>
+    <p class="text-white/90" id="session-id">Chargement de la session...</p>
+</div>
 <div class="absolute top-4 right-4 flex flex-col gap-2 z-10">
   <button
     onclick="shareOnWhatsApp()"
@@ -46,13 +47,13 @@
       <div class="flex flex-wrap gap-4 mb-4">
         <button
           onclick="addAddressField()"
-          class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          class="bg-green-500/20 text-white/90 px-4 py-2 rounded-full hover:bg-green-500/30 border border-green-500/50 backdrop-blur-sm transition-all"
         >
           ➕ Ajouter une adresse
         </button>
         <button
           onclick="calculateCenter()"
-          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          class="bg-blue-500/20 text-white/90 px-4 py-2 rounded-full hover:bg-blue-500/30 border border-blue-500/50 backdrop-blur-sm transition-all"
         >
           📍 Trouver un bar pas cher à mi-chemin
         </button>
