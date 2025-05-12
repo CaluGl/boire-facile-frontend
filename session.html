@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
   <head>
@@ -5,60 +6,68 @@
     <title>Mi-chemin 🍻</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style>
-      body {
-        min-height: 100vh;
-        background-image: url('./photo.jpg');
-        background-size: cover;
-        background-position: center;
-      }
-    </style>
   </head>
-  <body class="relative">
-    <!-- Titre en haut à gauche -->
-    <h1 class="absolute top-4 left-4 text-white text-2xl font-bold z-10">
-      Mi-chemin
-    </h1>
-
-    <!-- Boutons en haut à droite -->
-    <div class="absolute top-4 right-4 flex flex-row gap-2 z-10">
-      <button
-        onclick="window.location.href='index.html'"
-        class="bg-transparent border border-white text-white px-4 py-2 rounded-full hover:bg-white/10 transition-all"
-      >
-        ← Retour
-      </button>
-    </div>
-    <!-- Contenu principal -->
-    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/70 p-6 rounded-xl backdrop-blur-lg border border-white/20 shadow-xl max-w-3xl w-full z-20">      <h1 class="text-2xl font-bold mb-4">Session</h1>
+  <body
+    class="min-h-screen flex flex-col items-center justify-start p-4 sm:p-8 space-y-8 bg-cover bg-center"
+    style="background-image: url('./photo.jpg')"
+  >
+    <div class="bg-white shadow-lg rounded p-4 sm:p-6 max-w-6xl w-full">
+      <h1 class="text-2xl font-bold mb-4">🍻 Mi-chemin — Session</h1>
       <p class="mb-4" id="session-id">Chargement de la session...</p>
-      
-      <div class="space-y-4">
-        <div id="addresses" class="space-y-2"></div>
-        
-        <div class="flex flex-wrap gap-2">
-          <button
-            onclick="addAddressField()"
-            class="bg-transparent border border-blue-500 text-blue-500 px-4 py-2 rounded-full hover:bg-blue-500/10 transition-all"
-          >
-            Ajouter une adresse
-          </button>
-          <button
-            onclick="calculateCenter()"
-            class="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition-all"
-          >
-            Trouver un bar
-          </button>
-        </div>
+<div class="space-y-2">
+  <button
+    onclick="shareOnWhatsApp()"
+    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+  >
+    📲 Partager sur WhatsApp
+  </button>
+  <button
+    onclick="shareOnFacebook()"
+    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+  >
+    📘 Partager sur Facebook
+  </button>
+  <button
+    onclick="copyLink()"
+    class="bg-yellow-400 text-white px-4 py-2 rounded hover:bg-yellow-500"
+  >
+    🔗 Copier le lien
+  </button>
+</div>
 
-        <div id="result" class="mt-4 text-center"></div>
+
       </div>
+      <div id="addresses" class="space-y-2 mb-4"></div>
+
+      <div class="flex flex-wrap gap-4 mb-4">
+        <button
+          onclick="addAddressField()"
+          class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        >
+          ➕ Ajouter une adresse
+        </button>
+        <button
+          onclick="calculateCenter()"
+          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          📍 Trouver un bar pas cher à mi-chemin
+        </button>
+      </div>
+
+      <div id="result" class="mt-4 text-center text-lg font-medium"></div>
+      <div id="directions" class="mt-4 text-left text-sm space-y-4"></div>
     </div>
 
-    <!-- Carte -->
-    <div id="map" class="absolute top-0 left-0 w-full h-full z-10"></div>
+    <div
+      id="map"
+      class="w-full max-w-6xl h-64 sm:h-[500px] rounded shadow-md"
+    ></div>
+
     <script>
       const sessionId = new URLSearchParams(window.location.search).get("id");
       document.getElementById("session-id").textContent = sessionId
@@ -362,3 +371,5 @@
     <script src="script.js"></script>
   </body>
 </html>
+
+
